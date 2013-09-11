@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # evernote_backup.rb
 
 # are this 'requires' necessary, since we do not implement OAuth anyways?

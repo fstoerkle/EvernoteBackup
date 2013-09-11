@@ -1,17 +1,41 @@
 #!/usr/bin/env ruby
 # evernote_backup.rb
 
-# are this 'requires' necessary, since we do not implement OAuth anyways?
-require "oauth"
-require "oauth/consumer"
-
+require "toml"
 require "evernote_oauth"
 
-# developer token (since only access to my personal account is needed)
-# see https://sandbox.evernote.com/api/DeveloperToken.action
-DEVELOPER_TOKEN = "..."
+token = TOML.load_file(ENV["HOME"]+"/.backups/evernote.toml")["developer_key"]
 
-client = EvernoteOAuth::Client.new(token: DEVELOPER_TOKEN, sandbox: true)
+class EvernoteBackup
+  def initialize(developer_key, sandbox=true)
+    @token = developer_key
 
-notebooks = client.note_store.listNotebooks
-notebooks.each { |notebook| puts "Notebook: #{notebook.name}" }
+    client = EvernoteOAuth::Client.new(token: @token, sandbox: sandbox)
+    @store = client.note_store
+  end
+
+  def notebooks
+    @store.listNotebooks
+  end
+
+  def notes(notebook)
+    filter = Evernote::EDAM::NoteStore::NoteFilter.new(notebookGuid: notebook.guid)
+    result_spec = Evernote::EDAM::NoteStore::NotesMetadataResultSpec.new()
+    notes_metadata = @store.findNotesMetadata(@token, filter, 0, 1000, result_spec)
+
+    notes = []
+    notes_metadata.notes.each do |note_metadata|
+      notes << @store.getNote(@token, note_metadata.guid, true, false, false, false)
+    end
+
+    notes
+  end
+end
+
+evernote = EvernoteBackup.new token
+evernote.notebooks.each do |notebook|
+  puts "Notebook: #{notebook.name}"
+  evernote.notes(notebook).each do |note|
+    puts " - #{note.title}"
+  end
+end

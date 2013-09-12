@@ -4,11 +4,12 @@
 require "toml"
 require "evernote_oauth"
 
-token = TOML.load_file(ENV["HOME"]+"/.backups/evernote.toml")["developer_key"]
+CONFIG = TOML.load_file(ENV["HOME"]+"/.backups/evernote.toml")
 
 class EvernoteBackup
-  def initialize(developer_key, sandbox=true)
+  def initialize(developer_key, destination, sandbox=true)
     @token = developer_key
+    @destination = destination
 
     client = EvernoteOAuth::Client.new(token: @token, sandbox: sandbox)
     @store = client.note_store
@@ -30,12 +31,17 @@ class EvernoteBackup
 
     notes
   end
-end
-
-evernote = EvernoteBackup.new token
-evernote.notebooks.each do |notebook|
-  puts "Notebook: #{notebook.name}"
-  evernote.notes(notebook).each do |note|
-    puts " - #{note.title}"
+  
+  def self.run!(destination)
+    evernote = EvernoteBackup.new CONFIG["developer_key"], destination
+    
+    evernote.notebooks.each do |notebook|
+      puts "Notebook: #{notebook.name}"
+      evernote.notes(notebook).each do |note|
+        puts " - #{note.title}"
+      end
+    end
   end
 end
+
+

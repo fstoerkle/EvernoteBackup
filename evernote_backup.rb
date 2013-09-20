@@ -20,23 +20,35 @@ class EvernoteBackup
   end
 
   def notes(notebook)
+    notes = []
+
     filter = Evernote::EDAM::NoteStore::NoteFilter.new(notebookGuid: notebook.guid)
     result_spec = Evernote::EDAM::NoteStore::NotesMetadataResultSpec.new()
     notes_metadata = @store.findNotesMetadata(@token, filter, 0, 1000, result_spec)
 
-    notes = []
     notes_metadata.notes.each do |note_metadata|
       notes << @store.getNote(@token, note_metadata.guid, true, false, false, false)
     end
 
     notes
   end
+
+  def self._MOVEUP_safe_path(path)
+    path.gsub(/[\s']/, "_")
+  end
   
   def self.run!(destination)
     evernote = EvernoteBackup.new CONFIG["developer_key"], destination
-    
+    puts "Backing up Evernote to #{destination}"
+
+    unless File.directory? destination
+      Dir.mkdir destination 
+      puts "Creating destination directory since it does not exist yet"
+    end
+
     evernote.notebooks.each do |notebook|
-      puts "Notebook: #{notebook.name}"
+      Dir.mkdir File.join(destination, self._MOVEUP_safe_path(notebook.name))
+
       evernote.notes(notebook).each do |note|
         puts " - #{note.title}"
       end

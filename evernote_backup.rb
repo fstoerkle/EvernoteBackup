@@ -47,10 +47,12 @@ class EvernoteBackup
     end
 
     evernote.notebooks.each do |notebook|
-      Dir.mkdir File.join(destination, self._MOVEUP_safe_path(notebook.name))
+      notebook_path = File.join(destination, self._MOVEUP_safe_path(notebook.name))
+      Dir.mkdir notebook_path unless File.directory? notebook_path
 
       evernote.notes(notebook).each do |note|
-        puts " - #{note.title}"
+        note_path = File.join(notebook_path, self._MOVEUP_safe_path(note.title)) + ".html"
+        IO.write(note_path, note.content)
       end
     end
   end

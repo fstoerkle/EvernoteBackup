@@ -1,6 +1,8 @@
 require "rake"
 require "rspec/core/rake_task"
 
+require "toml"
+
 
 # Initializations
 # ----------------
@@ -13,7 +15,14 @@ Signal.trap("INT") { exit 1 }
 
 # set ./test_backup as default backup directory
 # (used if no other destination is set as environtment variable)
-ENV["destination"] ||= File.join(File.expand_path(File.dirname(__FILE__)), "test_backup")
+ENV["DESTINATION"] ||= File.join(File.expand_path(File.dirname(__FILE__)), "test_backup")
+
+# load authentication token if not present in ENV
+if ENV["DEVELOPER_KEY"].nil?
+  config = TOML.load_file(ENV["HOME"]+"/.backups/evernote.toml")
+  ENV["DEVELOPER_KEY"] = config["developer_key"]
+end
+
 
 
 
@@ -27,8 +36,8 @@ task :default => :spec
 # perform the backup
 task :backup do
   # run as follows
-  # $> rake backup destination=/path/to/output/dir
+  # $> rake backup DESTINATION=/path/to/output/dir
 
   require "evernote_backup.rb"
-  EvernoteBackup.run! ENV["destination"]
+  EvernoteBackup.run! ENV["DEVELOPER_KEY"], ENV["DESTINATION"]
 end

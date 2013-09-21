@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
 # evernote_backup.rb
 
-require "toml"
 require "evernote_oauth"
 
-CONFIG = TOML.load_file(ENV["HOME"]+"/.backups/evernote.toml")
 
 class EvernoteBackup
   def initialize(developer_key, destination, sandbox=true)
@@ -37,8 +35,8 @@ class EvernoteBackup
     path.gsub(/[\s']/, "_")
   end
   
-  def self.run!(destination)
-    evernote = EvernoteBackup.new CONFIG["developer_key"], destination
+  def self.run!(token, destination)
+    evernote = EvernoteBackup.new token, destination
     puts "Backing up Evernote to #{destination}"
 
     unless File.directory? destination

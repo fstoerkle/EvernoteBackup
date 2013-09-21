@@ -1,4 +1,4 @@
-EvernoteBackup [![Build Status](https://secure.travis-ci.org/fstoerkle/EvernoteBackup.png)](http://travis-ci.org/fstoerkle/EvernoteBackup)
+EvernoteBackup [![Build Status](https://secure.travis-ci.org/fstoerkle/EvernoteBackup.png)](http://travis-ci.org/fstoerkle/EvernoteBackup) [![Dependency Status](https://gemnasium.com/fstoerkle/EvernoteBackup.png)](https://gemnasium.com/fstoerkle/EvernoteBackup)
 ==============
 
 Small ruby script creating a backup for all Evernote notes
